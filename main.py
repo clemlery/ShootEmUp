@@ -1,4 +1,6 @@
 import pygame
+from functools import reduce
+from operator import add
 from Player import Player
 
 pygame.init()
@@ -23,23 +25,33 @@ player = Player(WIDTH//2, HEIGHT//2)
 pygame.display.set_caption("My Board")
 exit = False
 
+move_map = {pygame.K_UP: ( 0, -1),
+            pygame.K_DOWN: ( 0,  1),
+            pygame.K_LEFT: (-1,  0),
+            pygame.K_RIGHT: ( 1,  0)}
+
+move = []
+reduced = (0, 0)
+
 while not exit:
     # LOGIC SECTION
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit = True
-        elif event.type == pygame.KEYDOWN:
-            match event.type:
-                case pygame.K_UP:
-                    player.moove((0, 1))
-                case pygame.K_DOWN:
-                    player.moove((0, -1))
-                case pygame.K_LEFT:
-                    player.moove((-1, 0))
-                case pygame.K_RIGHT:
-                    player.moove((1, 0))
-    print(f"player x : {player.x} ; player y : {player.y}")
-    print(player.moove((0, 0)))
+        if event.type == pygame.KEYDOWN:
+            # get all pressed keys
+            pressed = pygame.key.get_pressed()
+            print(pressed)
+            exit = True
+            # get all directions the ship should move
+            move = [move_map[key] for key in move_map if pressed[key]]
+
+        if move:    
+            reduced = reduce(add, move, (0, 0))
+
+    player.moove(reduced)
     # DRAW SECTION
-    pygame.draw.rect(canvas, "white", [player.x, player.x, PLAYER_WIDTH, PLAYER_HEIGHT], 2)
     pygame.display.update()
+    canvas.fill((0, 0, 0))
+    print(f"player x : {player.x} ; player y : {player.y}")
+    pygame.draw.rect(canvas, "white", [player.x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT], 2)
